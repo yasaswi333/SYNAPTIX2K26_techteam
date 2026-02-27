@@ -1,0 +1,637 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Explore Nearby Attractions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: url('333.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      position: relative;
+    }
+
+    .overlay {
+      background: rgba(255, 255, 255, 0.1);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 36px;
+      color: #007bff;
+    }
+
+    #controls {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+
+    #controls input[type="text"] {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 250px;
+      outline: none;
+    }
+
+    #controls button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #controls button:hover {
+      background: #0056b3;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-toggle {
+      background: #007bff;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 300px;
+      text-align: left;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 300px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 10;
+      padding: 5px;
+    }
+
+    /* Styling for the top action buttons in the dropdown */
+    .dropdown-menu .top-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .dropdown-menu .top-actions button {
+      flex: 0 0 48%;
+      padding: 8px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+    
+    .dropdown-menu .top-actions button.all {
+      background: #28a745;
+    }
+    
+    .dropdown-menu .top-actions button.clear {
+      background: #dc3545;
+    }
+    
+    .dropdown-menu label {
+      display: inline-flex;
+      align-items: center;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .dropdown-menu label input {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    #info {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      color: #333;
+    }
+
+    #results {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    #results li {
+      background: #ffffff;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    /* Checkbox for each result (positioned at top right) */
+    .select-place {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      transform: scale(1.4);
+    }
+
+    #results img {
+      width: 200px;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .result-details {
+      flex: 1;
+    }
+
+    .result-name {
+      font-weight: bold;
+      font-size: 22px;
+      color: #007bff;
+      margin-bottom: 8px;
+    }
+
+    .result-rating {
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    .result-distance {
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .gmaps-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .gmaps-link:hover {
+      text-decoration: underline;
+    }
+
+    .priority-badge {
+      background: #ffc107;
+      color: #333;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    /* Action panel for multi-selected places */
+    .action-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: none;
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .action-panel button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <header>
+        <h1>Explore Nearby Attractions</h1>
+      </header>
+      <div id="controls">
+        <input id="to" type="text" placeholder="Enter destination" />
+
+        <div class="dropdown">
+          <button class="dropdown-toggle" onclick="toggleDropdown()">Filter Attractions ⬇</button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <!-- Top action buttons in dropdown -->
+            <div class="top-actions">
+              <button class="all" onclick="selectAllFilters()">select All</button>
+              <button class="clear" onclick="clearAllFilters()">Clear All</button>
+            </div>
+            <!-- Filter checkboxes -->
+            <label><input type="checkbox" value="natural_feature" class="filter-checkbox"> 🌳 Natural Attractions</label>
+            <label><input type="checkbox" value="museum" class="filter-checkbox"> 🏛️ Cultural & Historical</label>
+            <label><input type="checkbox" value="amusement_park" class="filter-checkbox"> 🎢 Adventurous</label>
+            <label><input type="checkbox" value="park" class="filter-checkbox"> 🏞️ Parks & Gardens</label>
+            <label><input type="checkbox" value="zoo" class="filter-checkbox"> 🦁 Zoos & Aquariums</label>
+            <label><input type="checkbox" value="place_of_worship" class="filter-checkbox"> 🛕 Religious Sites</label>
+            <label><input type="checkbox" value="tourist_attraction" class="filter-checkbox"> 🎪 Other Attractions</label>
+          </div>
+        </div>
+
+        <button id="search">Search</button>
+      </div>
+
+      <div id="info">Showing attractions near <span id="place-name">your location</span></div>
+      <ul id="results"></ul>
+    </div>
+  </div>
+
+  <!-- Action Panel for Selected Results -->
+  <div class="action-panel" id="action-panel">
+    <button class="clear-selected" onclick="clearSelected()">Clear</button>
+    <button class="trip-planner" onclick="goToTripPlanner()">Trip Planner</button>
+  </div>
+
+  <script>
+    let autocompleteTo, placesService;
+    const ATTRACTION_TYPES = [
+      'tourist_attraction',
+      'natural_feature',
+      'museum',
+      'amusement_park',
+      'park',
+      'zoo',
+      'place_of_worship',
+      'art_gallery',
+      'landmark'
+    ];
+
+    // These types will be filtered out from results
+    const NON_ATTRACTION_TYPES = [
+      'bank', 'atm', 'hospital', 'doctor', 'dentist', 'pharmacy',
+      'store', 'shopping_mall', 'supermarket', 'convenience_store',
+      'restaurant', 'cafe', 'bar', 'meal_takeaway', 'meal_delivery',
+      'hotel', 'lodging', 'real_estate_agency', 'travel_agency',
+      'car_rental', 'car_repair', 'gas_station', 'parking',
+      'post_office', 'local_government_office', 'school', 'university'
+    ];
+
+    // Toggle dropdown display
+    function toggleDropdown() {
+      const dropdownMenu = document.getElementById("dropdown-menu");
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    }
+
+    // Select all filter checkboxes and set default "tourist_attraction" too
+    function selectAllFilters() {
+      document.querySelectorAll(".filter-checkbox").forEach(box => box.checked = true);
+    }
+
+    // Clear all filter checkboxes
+    function clearAllFilters() {
+      document.querySelectorAll(".filter-checkbox").forEach(box => box.checked = false);
+    }
+
+    // On page load, pre-select all filters by default
+    window.addEventListener("load", () => {
+      selectAllFilters();
+    });
+
+    function initAutocomplete() {
+      autocompleteTo = new google.maps.places.Autocomplete(
+        document.getElementById("to"),
+        { types: ["geocode"] }
+      );
+      document.getElementById("search").addEventListener("click", searchPlaces);
+
+      const dummyMap = document.createElement("div");
+      placesService = new google.maps.places.PlacesService(dummyMap);
+    }
+
+    function getDistance(placeLocation, originLocation, callback) {
+  const service = new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix({
+    origins: [originLocation],
+    destinations: [placeLocation],
+    travelMode: 'DRIVING'
+  }, (response, status) => {
+    if (status === 'OK' && response?.rows?.[0]?.elements?.[0]?.status === 'OK') {
+      callback({
+        distance: response.rows[0].elements[0].distance?.text || 'N/A',
+        duration: response.rows[0].elements[0].duration?.text || 'N/A'
+      });
+    } else {
+      callback({
+        distance: 'Distance unavailable',
+        duration: ''
+      });
+    }
+  });
+}
+
+    function isGenuineAttraction(place) {
+      // Check if place has any of the attraction types
+      const hasAttractionType = place.types && place.types.some(type => 
+        ATTRACTION_TYPES.includes(type)
+      );
+      
+      // Check if place has any non-attraction types
+      const hasNonAttractionType = place.types && place.types.some(type => 
+        NON_ATTRACTION_TYPES.includes(type)
+      );
+      
+      return hasAttractionType && !hasNonAttractionType;
+    }
+
+
+    function searchPlaces() {
+  const place = autocompleteTo.getPlace();
+  const placeName = place.name || "your searched location";
+
+  if (!place || !place.geometry || !place.geometry.location) {
+    alert("Please select a valid destination from the suggestions.");
+    return;
+  }
+
+  document.getElementById("place-name").textContent = placeName;
+  document.getElementById("results").innerHTML = "";
+
+  const searchTypes = Array.from(document.querySelectorAll('.filter-checkbox:checked'))
+                          .map(cb => cb.value);
+  const uniqueSearchTypes = [...new Set(searchTypes)];
+
+  if (uniqueSearchTypes.length === 0) {
+    displaySortedResults([], placeName);
+    return;
+  }
+
+  const allResults = [];
+  const uniquePlaceIds = new Set();
+  let requestsPending = uniqueSearchTypes.length;
+
+  uniqueSearchTypes.forEach(type => {
+    const request = {
+      location: place.geometry.location,
+      radius: 100000, // CHANGED TO 100KM RADIUS
+      rankBy: google.maps.places.RankBy.PROMINENCE,
+      type: type
+    };
+
+    placesService.nearbySearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        let processed = 0;
+        results.forEach(p => {
+          // IMMEDIATELY CHECK + TRACK PLACE ID (BEFORE DETAILS FETCH)
+          if (uniquePlaceIds.has(p.place_id)) {
+            processed++;
+            if (processed === results.length && (--requestsPending === 0)) {
+              displaySortedResults(allResults, placeName);
+            }
+            return;
+          }
+          uniquePlaceIds.add(p.place_id); // ADD HERE TO PREVENT RACE CONDITION
+
+          placesService.getDetails({ placeId: p.place_id }, (details, status) => {
+  if (status === google.maps.places.PlacesServiceStatus.OK && 
+      isGenuineAttraction(details)) {
+    try {
+      getDistance(details.geometry.location, place.geometry.location, distanceInfo => {
+        allResults.push({
+          details: details,
+          distanceInfo: distanceInfo,
+          userRatings: details.user_ratings_total || 0,
+          isPriority: uniqueSearchTypes.length > 0 && 
+                     details.types.some(t => uniqueSearchTypes.includes(t)) &&
+                     (details.user_ratings_total || 0) >= 250
+        });
+        processed++;
+        if (processed === results.length && (--requestsPending === 0)) {
+          displaySortedResults(allResults, placeName);
+        }
+      });
+    } catch (error) {
+      console.error('Distance calculation failed:', error);
+      allResults.push({
+        details: details,
+        distanceInfo: { distance: 'Distance unavailable', duration: '' },
+        userRatings: details.user_ratings_total || 0,
+        isPriority: false
+      });
+      processed++;
+      if (processed === results.length && (--requestsPending === 0)) {
+        displaySortedResults(allResults, placeName);
+      }
+    }
+  } else {
+    processed++;
+    if (processed === results.length && (--requestsPending === 0)) {
+      displaySortedResults(allResults, placeName);
+    }
+  }
+});
+        });
+      } else {
+        if (--requestsPending === 0) {
+          displaySortedResults(allResults, placeName);
+        }
+      }
+    });
+  });
+}
+
+function displaySortedResults(results, placeName) {
+  // REMOVED DISTANCE CHECK (since we're searching within 100km)
+  results.sort((a, b) => {
+    if (a.isPriority && !b.isPriority) return -1;
+    if (!a.isPriority && b.isPriority) return 1;
+    if (b.userRatings !== a.userRatings) {
+      return b.userRatings - a.userRatings;
+    }
+    return (b.details.rating || 0) - (a.details.rating || 0);
+  });
+
+  const resultsContainer = document.getElementById("results");
+  resultsContainer.innerHTML = "";
+  const limitedResults = results.slice(0, 50);
+
+  limitedResults.forEach(result => {
+    const place = result.details;
+    const distanceInfo = result.distanceInfo;
+    
+    // NO LONGER SKIPPING BASED ON DISTANCE
+    const li = document.createElement("li");
+    let photoUrl = place.photos
+      ? place.photos[0].getUrl({ maxWidth: 400 })
+      : "https://via.placeholder.com/400x200?text=No+Image";
+
+      li.innerHTML = `
+  <img src="${photoUrl}" alt="${place.name}">
+  <div class="result-details">
+    <div class="result-name">${place.name} ${result.isPriority ? '<span class="priority-badge">Popular</span>' : ''}</div>
+    <div class="result-rating">Rating: ${place.rating || 'N/A'} (${place.user_ratings_total || 0} reviews)</div>
+    <div class="result-distance">${distanceInfo.distance ? `Distance from ${placeName}: ${distanceInfo.distance} (${distanceInfo.duration})` : 'Distance information not available'}</div>
+    <a class="gmaps-link" href="https://www.google.com/maps/place/?q=place_id:${place.place_id}" target="_blank">Open in Google Maps</a>
+  </div>
+  <input type="checkbox" class="select-place" />
+`;
+    resultsContainer.appendChild(li);
+  });
+  updateActionPanel();
+  document.querySelectorAll(".select-place").forEach(checkbox => {
+    checkbox.addEventListener("change", updateActionPanel);
+  });
+}
+
+    function displaySortedResults(results, placeName) {
+      // Sort with priority first, then by review count then rating
+      results.sort((a, b) => {
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+        if (b.userRatings !== a.userRatings) {
+          return b.userRatings - a.userRatings;
+        }
+        return (b.details.rating || 0) - (a.details.rating || 0);
+      });
+
+      const resultsContainer = document.getElementById("results");
+      resultsContainer.innerHTML = "";
+      const limitedResults = results.slice(0, 50);
+
+      limitedResults.forEach(result => {
+        const place = result.details;
+        const distanceInfo = result.distanceInfo;
+        
+        
+        // Skip places too far away (more than 100km)
+        const distanceKm = parseFloat(distanceInfo.distance.split(' ')[0]);
+        if (distanceKm > 100) return;
+
+        const li = document.createElement("li");
+        let photoUrl = place.photos
+          ? place.photos[0].getUrl({ maxWidth: 400 })
+          : "https://via.placeholder.com/400x200?text=No+Image";
+
+        li.innerHTML = `
+          <img src="${photoUrl}" alt="${place.name}">
+          <div class="result-details">
+            <div class="result-name">${place.name} ${result.isPriority ? '<span class="priority-badge">Popular</span>' : ''}</div>
+            <div class="result-rating">Rating: ${place.rating || 'N/A'} (${place.user_ratings_total || 0} reviews)</div>
+            <div class="result-distance">Distance from ${placeName}: ${distanceInfo.distance} (${distanceInfo.duration})</div>
+            <a class="gmaps-link" href="https://www.google.com/maps/place/?q=place_id:${place.place_id}" target="_blank">Open in Google Maps</a>
+          </div>
+          <input type="checkbox" class="select-place" />
+        `;
+        resultsContainer.appendChild(li);
+      });
+      updateActionPanel();
+      // Attach event listeners to new checkboxes
+      document.querySelectorAll(".select-place").forEach(checkbox => {
+        checkbox.addEventListener("change", updateActionPanel);
+      });
+    }
+
+    // Update visibility of action panel based on selected checkboxes
+    function updateActionPanel() {
+      const selectedCheckboxes = document.querySelectorAll("#results .select-place:checked");
+      const panel = document.getElementById("action-panel");
+      panel.style.display = selectedCheckboxes.length > 0 ? "flex" : "none";
+    }
+
+    // Clear all selected checkboxes
+    function clearSelected() {
+      const selectedCheckboxes = document.querySelectorAll("#results .select-place:checked");
+      selectedCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      updateActionPanel();
+    }
+
+    // Gather selected items and go to trip planner page
+    function goToTripPlanner() {
+      const selectedCheckboxes = document.querySelectorAll("#results .select-place:checked");
+      const selectedPlaces = [];
+      
+      selectedCheckboxes.forEach(cb => {
+        const li = cb.closest("li");
+        const name = li.querySelector(".result-name").textContent;
+        const lat = li.dataset.lat;
+        const lng = li.dataset.lng;
+        const distance = li.querySelector(".result-distance").textContent;
+        const rating = li.querySelector(".result-rating").textContent;
+
+        selectedPlaces.push({
+          name: `"${name}"`,
+          lat,
+          lng,
+          distance: `"${distance}"`,
+          rating: `"${rating}"`
+        });
+      });
+
+      // Create CSV string
+      const csvContent = [
+        "Name,Latitude,Longitude,Distance,Rating",
+        ...selectedPlaces.map(p => 
+          `${p.name},${p.lat},${p.lng},${p.distance},${p.rating}`
+        )
+      ].join("\n");
+
+      localStorage.setItem("selectedPlacesCSV", csvContent);
+      window.location.href = "tripplanner.html";
+    }
+
+    function loadScript() {
+      const script = document.createElement("script");
+      script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAsjqV6vzVGJ-j_Qm7KjrmbBMCRDe-wNjw&libraries=places&callback=initAutocomplete";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+
+    window.onload = loadScript;
+  </script>
+</body>
+</html>
