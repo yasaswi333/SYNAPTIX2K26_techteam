@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Guide</title>
+    <style> 
+            * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: url('travel_background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column; /* Align options vertically */
+  align-items: center; /* Center align items */
+  gap: 15px; /* Spacing between items */
+}
+
+.option {
+  width: 80%; /* Adjust width for better alignment */
+  max-width: 300px; /* Set a maximum width */
+  text-align: center;
+}
+
+.option a {
+  display: block;
+  padding: 12px 20px;
+  background-color: #007BFF;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: background 0.3s;
+}
+
+.option a:hover {
+  background-color: #0056b3;
+}
+
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Travel Guide</h1>
+        </header>
+        <main>
+            <div class="options">
+              <div class="option" id="popular-places-option">
+                <a href="popular.html">Popular Places</a>
+              </div>
+                <div class="option" id="route-planner-option">
+                    <a href="route.html">Route Planner</a>
+                </div>
+                <div class="option" id="hotels-and-restaurants-option">
+                    <a href="hotels.html">Hotels & Restaurants</a>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+    <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Page loaded, script running...");
+});
+
+    </script>
+</body>
+</html>
